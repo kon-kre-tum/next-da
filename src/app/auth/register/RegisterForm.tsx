@@ -1,5 +1,5 @@
-
 "use client";
+import { registerUser } from "@/actions/authAction";
 import {
   RegisterSchema,
   registerSchema,
@@ -9,18 +9,37 @@ import { Card, CardHeader, CardBody, Button, Input } from "@nextui-org/react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { GiPadlock } from "react-icons/gi";
+import { set } from "zod";
 
 export default function RegisterForm() {
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    setError,
+    formState: { errors, isValid, isSubmitting},
   } = useForm<RegisterSchema>({
-    resolver: zodResolver(registerSchema),
+    // resolver: zodResolver(registerSchema),
     mode: "onTouched",
   });
-  const onSubmit = (data: RegisterSchema) => {
+  const onSubmit = async (data: RegisterSchema) => {
     console.log(data);
+    const result = await registerUser(data);
+    console.log(result);
+    if (result.status === "success") {
+      console.log("User registered successfully");
+    } else {
+      if (Array.isArray(result.error)) {
+        result.error.forEach((error) => {
+          const fieldName = error.path.join(".") as
+            | "name"
+            | "email"
+            | "password";
+          setError(fieldName, { message: error.message });
+        });
+      } else {
+        setError("root.serverError", { message: result.error });
+      }
+    }
   };
 
   return (
@@ -31,7 +50,9 @@ export default function RegisterForm() {
             <GiPadlock size={30} />
             <h1 className="text-3xl font-semibold">Register</h1>
           </div>
-          <p className="text-neutral-500">Sign up to meet people around you...</p>
+          <p className="text-neutral-500">
+            Sign up to meet people around you...
+          </p>
         </div>
       </CardHeader>
       <CardBody>
@@ -62,7 +83,13 @@ export default function RegisterForm() {
               isInvalid={!!errors.password}
               errorMessage={errors.password?.message}
             />
+
+            {errors.root?.serverError && (
+              <p className="text-danger text-sm">{errors.root.serverError.message}</p>
+            )}
+
             <Button
+              isLoading={isSubmitting}
               isDisabled={!isValid}
               fullWidth
               color="primary"
