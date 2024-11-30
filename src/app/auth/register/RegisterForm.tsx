@@ -9,7 +9,6 @@ import { Card, CardHeader, CardBody, Button, Input } from "@nextui-org/react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { GiPadlock } from "react-icons/gi";
-import { set } from "zod";
 
 export default function RegisterForm() {
   const {
@@ -18,7 +17,7 @@ export default function RegisterForm() {
     setError,
     formState: { errors, isValid, isSubmitting},
   } = useForm<RegisterSchema>({
-    // resolver: zodResolver(registerSchema),
+    resolver: zodResolver(registerSchema),
     mode: "onTouched",
   });
   const onSubmit = async (data: RegisterSchema) => {
