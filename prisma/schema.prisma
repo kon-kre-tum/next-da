@@ -86,4 +86,5 @@ model Like {
   targetMember Member @relation("target", fields: [targetUserId], references: [userId], onDelete: Cascade)
 
   @@id([sourceUserId, targetUserId])
+  @@map("likes")
 }
