@@ -6,7 +6,7 @@ import {
   registerSchema,
   RegisterSchema,
 } from "@/app/lib/schemas/registerSchema";
-import { signIn } from "@/auth";
+import { signIn, signOut } from "@/auth";
 import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
@@ -72,7 +72,7 @@ export async function registerUser(
 
     return { status: "success", data: user };
   } catch (error) {
-    console.lo(error);
+    console.log(error);
     return { status: "error", error: "Something went wrong" };
   }
 }
@@ -83,4 +83,8 @@ export async function getUserByEmail(email: string): Promise<User | null> {
 
 export async function getUserById(id: string): Promise<User | null> {
   return prisma.user.findUnique({ where: { id } });
+}
+
+export async function signOutUser(){
+  await signOut({redirectTo: "/"});
 }
