@@ -41,7 +41,7 @@ model User {
   passwordHash  String
   image         String?
   accounts      Account[]
-  members       Member?
+  member        Member?
 
   @@map("users")
 }
@@ -67,7 +67,7 @@ model Member {
 model Photo {
   id       String @id @default(cuid())
   url      String
-  publicId String @map("public_id")
+  publicId String? @map("public_id")
 
   memberId String
   member   Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
