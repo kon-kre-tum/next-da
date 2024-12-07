@@ -10,23 +10,17 @@ import {
 import { Member } from "@prisma/client";
 import React from "react";
 import { caculateAge, getDefaultImageSrc } from "../lib/utils";
-import { ca } from "date-fns/locale";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 type Props = {
   member: Member;
+  navLinks: { name: string; href: string }[];
 };
 
-export default function MemberSidebar({ member }: Props) {
-  const basePath = `/members/${member.userId}`;
+export default function MemberSidebar({ member, navLinks }: Props) {
   const pathName = usePathname();
 
-  const navLinks = [
-    { name: "Profile", href: `${basePath}` },
-    { name: "Photos", href: `${basePath}/photos` },
-    { name: "Chat", href: `${basePath}/chat` },
-  ];
   return (
     <Card className="w-full mt-10 items-center h-[80vh]">
       <Image

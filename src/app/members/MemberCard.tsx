@@ -16,7 +16,7 @@ export default function MemberCard({ member, likedIds }: Props) {
 
   const preventLinkAction = (e: React.MouseEvent) => {
     e.preventDefault();
-    e.stopPropagation;
+    e.stopPropagation();
   };
 
   return (

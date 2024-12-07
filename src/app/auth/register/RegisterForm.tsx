@@ -4,40 +4,31 @@ import {
   RegisterSchema,
   registerSchema,
 } from "@/app/lib/schemas/registerSchema";
+import { handleFormServerError } from "@/app/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardHeader, CardBody, Button, Input } from "@nextui-org/react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { GiPadlock } from "react-icons/gi";
+import { toast } from "react-toastify";
 
 export default function RegisterForm() {
   const {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isValid, isSubmitting},
+    formState: { errors, isValid, isSubmitting },
   } = useForm<RegisterSchema>({
     resolver: zodResolver(registerSchema),
     mode: "onTouched",
   });
   const onSubmit = async (data: RegisterSchema) => {
-    console.log(data);
     const result = await registerUser(data);
-    console.log(result);
     if (result.status === "success") {
-      console.log("User registered successfully");
+      toast.success("User registered successfully");
     } else {
-      if (Array.isArray(result.error)) {
-        result.error.forEach((error) => {
-          const fieldName = error.path.join(".") as
-            | "name"
-            | "email"
-            | "password";
-          setError(fieldName, { message: error.message });
-        });
-      } else {
-        setError("root.serverError", { message: result.error });
-      }
+      // utils method to handle server errors
+      handleFormServerError(result, setError);
     }
   };
 
@@ -84,7 +75,9 @@ export default function RegisterForm() {
             />
 
             {errors.root?.serverError && (
-              <p className="text-danger text-sm">{errors.root.serverError.message}</p>
+              <p className="text-danger text-sm">
+                {errors.root.serverError.message}
+              </p>
             )}
 
             <Button
