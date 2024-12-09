@@ -64,6 +64,9 @@ model Member {
   sourceLikes Like[] @relation("source")
   targetLikes Like[] @relation("target")
 
+  senderMessages    Message[] @relation("sender")
+  recipientMessages Message[] @relation("recipient")
+
   @@map("members")
 }
 
@@ -87,4 +90,22 @@ model Like {
 
   @@id([sourceUserId, targetUserId])
   @@map("likes")
+}
+
+model Message {
+  id        String   @id @default(cuid())
+  text      String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  senderId String?
+  sender   Member? @relation("sender", fields: [senderId], references: [id], onDelete: SetNull)
+
+  recipientId String?
+  recepient   Member? @relation("recipient", fields: [recipientId], references: [id], onDelete: SetNull)
+
+  dateRead         DateTime? @map("date_read")
+  senderDeleted    Boolean   @default(false) @map("sender_deleted")
+  recipientDeleted Boolean   @default(false) @map("recipient_deleted")
+
+  @@map("messages")
 }
