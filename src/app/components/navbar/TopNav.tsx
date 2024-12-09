@@ -4,16 +4,17 @@ import {
   Navbar,
   NavbarBrand,
   NavbarContent,
-  NavbarItem,
 } from "@nextui-org/react";
 import React from "react";
 import { GiMatchTip } from "react-icons/gi";
 import NavLink from "./NavLink";
 import { auth } from "@/auth";
 import UserMenu from "./UserMenu";
+import { getUserInfoForNav } from "@/actions/userActions";
 
 export default async function TopNav() {
   const session = await auth();
+  const userInfo = session?.user && await getUserInfoForNav();
 
   return (
     <Navbar
@@ -41,8 +42,8 @@ export default async function TopNav() {
         <NavLink href="/messages" label="Messages" />
       </NavbarContent>
       <NavbarContent justify="end">
-        {session?.user ? (
-          <UserMenu user={session.user} />
+        {userInfo ? (
+          <UserMenu userInfo={userInfo} />
         ) : (
           <>
             <Button

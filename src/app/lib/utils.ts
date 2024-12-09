@@ -1,3 +1,4 @@
+
 import { differenceInYears } from "date-fns";
 import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { ZodIssue } from "zod";
@@ -22,4 +23,26 @@ export function handleFormServerError<TFieldValues extends FieldValues>(
   } else {
     setError("root.serverError", { message: errorResponse.error });
   }
+}
+
+/**
+ * Transforms a given Cloudinary image URL to include specific transformations.
+ * If the URL does not belong to Cloudinary, it returns the original URL.
+ * If the URL is null or undefined, it returns null.
+ *
+ * @param imageUrl - The original image URL.
+ * @returns The transformed image URL with Cloudinary transformations applied, or the original URL if not a Cloudinary URL, or null if the input is null or undefined.
+ */
+export function transformImageUrl(imageUrl?: string | null) {
+  if (!imageUrl) return null;
+
+  if(!imageUrl.includes("cloudinary")) {
+    return imageUrl;
+  }
+  const uploadIndex = imageUrl.indexOf("/upload/") + "/upload/".length;
+  const transformation = "c_fill,w_300,h_300,g_faces/";
+  console.log(`${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(uploadIndex)}`);
+
+  return `${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(uploadIndex)}`;
+
 }
