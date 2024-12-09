@@ -101,7 +101,7 @@ model Message {
   sender   Member? @relation("sender", fields: [senderId], references: [id], onDelete: SetNull)
 
   recipientId String?
-  recepient   Member? @relation("recipient", fields: [recipientId], references: [id], onDelete: SetNull)
+  recipient   Member? @relation("recipient", fields: [recipientId], references: [id], onDelete: SetNull)
 
   dateRead         DateTime? @map("date_read")
   senderDeleted    Boolean   @default(false) @map("sender_deleted")
