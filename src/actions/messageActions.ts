@@ -4,6 +4,8 @@ import { prisma } from "@/app/lib/prisma";
 import { MessageSchema, messageSchema } from "@/app/lib/schemas/messageSchema";
 import { getAuthUserId } from "./likeActions";
 import { Message } from "@prisma/client";
+import { ActionResult } from "@/types";
+import { mapMessageToMessageDto } from "@/app/lib/mappings";
 
 export async function createMessage(
   recipientId: string,
@@ -26,19 +28,65 @@ export async function createMessage(
         senderId: userId,
         recipientDeleted: false,
         senderDeleted: false,
-      }
-    });
-
-    console.log(message);
-
-    return { status: 'success', data: message};
-    
+      },
+    })
+    return { status: "success", data: message };
   } catch (error) {
     console.log(error);
-    console.log("no error??");
     return {
       status: "error",
       error: "An error occurred while creating the message.",
+    };
+  }
+}
+
+export async function getMessagesThread(recipientId: string) {
+  try {
+    const userId = await getAuthUserId();
+    const messages = await prisma.message.findMany({
+      where: {
+        OR: [
+          {
+            senderId: userId,
+            recipientId: recipientId,
+          },
+          {
+            senderId: recipientId,
+            recipientId: userId,
+          },
+        ],
+      },
+      orderBy: {
+        created: "asc",
+      },
+      select: {
+        id: true,
+        text: true,
+        created: true,
+        dateRead: true,
+        sender: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+        recipient: {
+          select: {
+            id: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
+    });
+    
+    return messages.map(message =>mapMessageToMessageDto(message))
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      error: "An error occurred while fetching the messages.",
     };
   }
 }

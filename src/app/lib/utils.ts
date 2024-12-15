@@ -1,10 +1,14 @@
 
-import { differenceInYears } from "date-fns";
+import { differenceInYears, format } from "date-fns";
 import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { ZodIssue } from "zod";
 
 export function caculateAge(birthDate: Date) {
   return differenceInYears(new Date(), birthDate);
+}
+
+export function formatShortDateTime(date: Date) {
+  return format(date, "dd MMM yy h:mm:a");
 }
 
 export function getDefaultImageSrc() {
@@ -44,5 +48,4 @@ export function transformImageUrl(imageUrl?: string | null) {
   console.log(`${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(uploadIndex)}`);
 
   return `${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(uploadIndex)}`;
-
 }

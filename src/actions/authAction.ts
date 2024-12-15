@@ -15,12 +15,12 @@ export async function signInUser(
   data: LoginSchema
 ): Promise<ActionResult<string>> {
   try {
-    const result = await signIn("credentials", {
+    await signIn("credentials", {
       email: data.email,
       password: data.password,
       redirect: false,
     });
-    console.log(result);
+
     return { status: "success", data: "Logged in" };
   } catch (error) {
     console.log(error);
@@ -28,11 +28,11 @@ export async function signInUser(
     if (error instanceof AuthError) {
       switch (error.type) {
         case "CredentialsSignin":
-          return { status: "error", error: "Invalid credentials" };      
+          return { status: "error", error: "Invalid credentials" };
         default:
           return { status: "error", error: "Something went wrong" };
       }
-    }else{
+    } else {
       return { status: "error", error: "Something else went wrong" };
     }
   }
@@ -85,6 +85,6 @@ export async function getUserById(id: string): Promise<User | null> {
   return prisma.user.findUnique({ where: { id } });
 }
 
-export async function signOutUser(){
-  await signOut({redirectTo: "/"});
+export async function signOutUser() {
+  await signOut({ redirectTo: "/" });
 }
