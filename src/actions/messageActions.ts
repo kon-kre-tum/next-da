@@ -20,7 +20,7 @@ export async function createMessage(
       return { status: "error", error: validated.error.errors };
 
     const { text } = validated.data;
-    console.log(userId, recipientId, text);
+
     const message = await prisma.message.create({
       data: {
         text,
@@ -66,14 +66,14 @@ export async function getMessagesThread(recipientId: string) {
         dateRead: true,
         sender: {
           select: {
-            id: true,
+            userId: true,
             name: true,
             image: true,
           },
         },
         recipient: {
           select: {
-            id: true,
+            userId: true,
             name: true,
             image: true,
           },
