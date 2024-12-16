@@ -6,6 +6,7 @@ import { getAuthUserId } from "./likeActions";
 import { Message } from "@prisma/client";
 import { ActionResult } from "@/types";
 import { mapMessageToMessageDto } from "@/app/lib/mappings";
+import { console } from "inspector";
 
 export async function createMessage(
   recipientId: string,
@@ -29,7 +30,7 @@ export async function createMessage(
         recipientDeleted: false,
         senderDeleted: false,
       },
-    })
+    });
     return { status: "success", data: message };
   } catch (error) {
     console.log(error);
@@ -80,8 +81,53 @@ export async function getMessagesThread(recipientId: string) {
         },
       },
     });
-    
-    return messages.map(message =>mapMessageToMessageDto(message))
+
+    return messages.map((message) => mapMessageToMessageDto(message));
+  } catch (error) {
+    console.log(error);
+    return {
+      status: "error",
+      error: "An error occurred while fetching the messages.",
+    };
+  }
+}
+
+export async function getMessagesByContainer(container: string) {
+  try {
+    const userId = await getAuthUserId();
+
+    const selector = container === "outbox" ? "senderId" : "recipientId";
+
+    const messages = await prisma.message.findMany({
+      where: {
+        [selector]: userId,
+      },
+      orderBy: {
+        created: "desc",
+      },
+      select: {
+        id: true,
+        text: true,
+        created: true,
+        dateRead: true,
+        sender: {
+          select: {
+            userId: true,
+            name: true,
+            image: true,
+          },
+        },
+        recipient: {
+          select: {
+            userId: true,
+            name: true,
+            image: true,
+          },
+        },
+      },
+    });
+
+    return messages.map((message) => mapMessageToMessageDto(message));
   } catch (error) {
     console.log(error);
     return {

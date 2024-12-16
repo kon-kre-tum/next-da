@@ -1,3 +1,4 @@
+"use client";
 import { Chip } from "@nextui-org/react";
 import clsx from "clsx";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
