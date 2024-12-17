@@ -6,7 +6,6 @@ import { getAuthUserId } from "./likeActions";
 import { Message } from "@prisma/client";
 import { ActionResult } from "@/types";
 import { mapMessageToMessageDto } from "@/app/lib/mappings";
-import { console } from "inspector";
 
 export async function createMessage(
   recipientId: string,
@@ -81,6 +80,19 @@ export async function getMessagesThread(recipientId: string) {
         },
       },
     });
+
+    if (messages.length > 0) {
+      await prisma.message.updateMany({
+        where: {
+          senderId: recipientId,
+          recipientId: userId,
+          dateRead: null,
+        },
+        data: {
+          dateRead: new Date(),
+        },
+      });
+    }
 
     return messages.map((message) => mapMessageToMessageDto(message));
   } catch (error) {

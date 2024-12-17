@@ -1,7 +1,8 @@
 "use client";
 import { MessageDto } from "@/types";
 import {
-    Card,
+  Avatar,
+  Card,
   getKeyValue,
   Table,
   TableBody,
@@ -11,7 +12,8 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { Key } from "react";
+import React, { Key, useCallback } from "react";
+import { getDefaultImageSrc } from "../lib/utils";
 
 type Props = {
   messages: MessageDto[];
@@ -35,6 +37,10 @@ export default function MessagesTable({ messages }: Props) {
       key: "created",
       label: isOutbox ? "Date sent" : "Date received",
     },
+    {
+      key: "actions",
+      label: "Actions",
+    },
   ];
 
   const handleRowSelection = (key: Key) => {
@@ -45,17 +51,45 @@ export default function MessagesTable({ messages }: Props) {
     router.push(url);
   };
 
+  const renderCell = useCallback(
+    (item: MessageDto, columnKey: keyof MessageDto) => {
+      const cellValue = item[columnKey];
+
+      switch (columnKey) {
+        case "recipientName":
+        case "senderName":
+          return (
+            <div className={`flex items-center gap-2 cursor-pointer ${item.dateRead && !isOutbox ? "" : "font-semibold"}`}>
+              <Avatar
+                alt="Member Image"
+                src={
+                  (isOutbox ? item.recipientImage : item.senderImage) ||
+                  getDefaultImageSrc()
+                }
+              />
+              <span>{cellValue}</span>
+            </div>
+          );
+          break;
+
+        default:
+          break;
+      }
+    },
+    []
+  );
+
   return (
     <Card className="flex flex-col gap-3 h-[80vh] overflow-auto">
       <Table
         aria-label="Messages table"
         selectionMode="single"
-        onRowAction={(key) => handleRowSelection(key as Key) }
+        onRowAction={(key) => handleRowSelection(key as Key)}
         shadow="none"
       >
         <TableHeader columns={columns}>
           {(column) => (
-            <TableColumn key={column.key}> {column.label}</TableColumn>
+            <TableColumn key={column.key}>{column.label}</TableColumn>
           )}
         </TableHeader>
         <TableBody
@@ -65,7 +99,15 @@ export default function MessagesTable({ messages }: Props) {
           {(item) => (
             <TableRow key={item.id} className="cursor-pointer">
               {(columnKey) => (
-                <TableCell>{getKeyValue(item, columnKey)}</TableCell>
+                <TableCell>
+                  <div
+                    className={`${
+                      !item.dateRead && !isOutbox ? "font-semibold" : ""
+                    }`}
+                  >
+                    {getKeyValue(item, columnKey)}
+                  </div>
+                </TableCell>
               )}
             </TableRow>
           )}
