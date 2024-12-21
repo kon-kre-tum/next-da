@@ -1,4 +1,3 @@
-
 import { differenceInYears, format } from "date-fns";
 import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { ZodIssue } from "zod";
@@ -40,12 +39,24 @@ export function handleFormServerError<TFieldValues extends FieldValues>(
 export function transformImageUrl(imageUrl?: string | null) {
   if (!imageUrl) return null;
 
-  if(!imageUrl.includes("cloudinary")) {
+  if (!imageUrl.includes("cloudinary")) {
     return imageUrl;
   }
   const uploadIndex = imageUrl.indexOf("/upload/") + "/upload/".length;
   const transformation = "c_fill,w_300,h_300,g_faces/";
-  console.log(`${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(uploadIndex)}`);
+  console.log(
+    `${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(
+      uploadIndex
+    )}`
+  );
 
-  return `${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(uploadIndex)}`;
+  return `${imageUrl.slice(0, uploadIndex)}${transformation}${imageUrl.slice(
+    uploadIndex
+  )}`;
+}
+
+export function truncateString(text?: string | null, length = 50) {
+  if (!text) return null;
+
+  return text.length > length ? `${text.slice(0, length)}...` : text;
 }

@@ -2,8 +2,8 @@
 import { MessageDto } from "@/types";
 import {
   Avatar,
+  Button,
   Card,
-  getKeyValue,
   Table,
   TableBody,
   TableCell,
@@ -12,8 +12,10 @@ import {
   TableRow,
 } from "@nextui-org/react";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { Key, useCallback } from "react";
-import { getDefaultImageSrc } from "../lib/utils";
+import React, { Key, useCallback, useState } from "react";
+import { getDefaultImageSrc, truncateString } from "../lib/utils";
+import { AiFillDelete } from "react-icons/ai";
+import { deleteMessage } from "@/actions/messageActions";
 
 type Props = {
   messages: MessageDto[];
@@ -23,6 +25,7 @@ export default function MessagesTable({ messages }: Props) {
   const searchParams = useSearchParams();
 
   const isOutbox = searchParams.get("container") === "outbox";
+  const [isDeleting, setIsDeleting] = useState({ id: "", loading: false });
 
   const columns = [
     {
@@ -43,6 +46,16 @@ export default function MessagesTable({ messages }: Props) {
     },
   ];
 
+  const handleDeleteMessage = useCallback(
+    async (message: MessageDto) => {
+      setIsDeleting({ id: message.id, loading: true });
+      await deleteMessage(message.id, isOutbox);
+      router.refresh();
+      setIsDeleting({ id: "", loading: false });
+    },
+    [isOutbox, router]
+  );
+
   const handleRowSelection = (key: Key) => {
     const message = messages.find((m) => m.id === key);
     const url = isOutbox
@@ -59,7 +72,7 @@ export default function MessagesTable({ messages }: Props) {
         case "recipientName":
         case "senderName":
           return (
-            <div className={`flex items-center gap-2 cursor-pointer ${item.dateRead && !isOutbox ? "" : "font-semibold"}`}>
+            <div className="flex items-center gap-2 cursor-pointer ">
               <Avatar
                 alt="Member Image"
                 src={
@@ -70,13 +83,24 @@ export default function MessagesTable({ messages }: Props) {
               <span>{cellValue}</span>
             </div>
           );
-          break;
-
+        case "text":
+          return <div className="truncate">{truncateString(cellValue, 80)}</div>;
+        case "created":
+          return cellValue;
         default:
-          break;
+          return (
+            <Button
+              isIconOnly
+              variant="light"
+              onClick={() => handleDeleteMessage(item)}
+              isLoading={isDeleting.id === item.id && isDeleting.loading}
+            >
+              <AiFillDelete size={24} className="text-danger" />
+            </Button>
+          );
       }
     },
-    []
+    [isOutbox, isDeleting.id, isDeleting.loading, handleDeleteMessage]
   );
 
   return (
@@ -89,7 +113,7 @@ export default function MessagesTable({ messages }: Props) {
       >
         <TableHeader columns={columns}>
           {(column) => (
-            <TableColumn key={column.key}>{column.label}</TableColumn>
+            <TableColumn key={column.key} width={column.key === "text"? "50%": undefined }>{column.label}</TableColumn>
           )}
         </TableHeader>
         <TableBody
@@ -99,14 +123,12 @@ export default function MessagesTable({ messages }: Props) {
           {(item) => (
             <TableRow key={item.id} className="cursor-pointer">
               {(columnKey) => (
-                <TableCell>
-                  <div
-                    className={`${
-                      !item.dateRead && !isOutbox ? "font-semibold" : ""
-                    }`}
-                  >
-                    {getKeyValue(item, columnKey)}
-                  </div>
+                <TableCell
+                  className={`${
+                    item.dateRead && !isOutbox ? "" : "font-semibold"
+                  }`}
+                >
+                  {renderCell(item, columnKey as keyof MessageDto)}
                 </TableCell>
               )}
             </TableRow>
