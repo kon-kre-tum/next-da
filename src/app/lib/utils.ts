@@ -1,4 +1,4 @@
-import { differenceInYears, format } from "date-fns";
+import { differenceInYears, format, formatDistance } from "date-fns";
 import { FieldValues, Path, UseFormSetError } from "react-hook-form";
 import { ZodIssue } from "zod";
 
@@ -63,4 +63,8 @@ export function truncateString(text?: string | null, length = 50) {
 
 export function createChatId(a: string, b: string) {
   return a > b ? `${a}-${b}` : `${b}-${a}`;
+}
+
+export function timeAgo(date: string) {
+  return formatDistance(new Date(date), new Date()) + " ago";
 }

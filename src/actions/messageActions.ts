@@ -30,13 +30,17 @@ export async function createMessage(
         recipientDeleted: false,
         senderDeleted: false,
       },
-      select: messageSelect
+      select: messageSelect,
     });
-    
+
     const messageDto = mapMessageToMessageDto(message);
 
     // send pusher event
-    await pusherServer.trigger(createChatId(userId, recipientId), "message:new", messageDto);
+    await pusherServer.trigger(
+      createChatId(userId, recipientId),
+      "message:new",
+      messageDto
+    );
 
     return { status: "success", data: messageDto };
   } catch (error) {
@@ -69,20 +73,29 @@ export async function getMessagesThread(recipientId: string) {
       orderBy: {
         created: "asc",
       },
-      select: messageSelect
+      select: messageSelect,
     });
 
     if (messages.length > 0) {
+      const readMessageIds = messages
+        .filter(
+          (m) =>
+            m.dateRead === null &&
+            m.recipient?.userId === userId &&
+            m.sender?.userId === recipientId
+        )
+        .map((m) => m.id);
+
       await prisma.message.updateMany({
         where: {
-          senderId: recipientId,
-          recipientId: userId,
-          dateRead: null,
+          id: { in: readMessageIds },
         },
         data: {
           dateRead: new Date(),
         },
       });
+
+      await pusherServer.trigger(createChatId(recipientId, userId), "messages:read", readMessageIds);
     }
 
     return messages.map((message) => mapMessageToMessageDto(message));
@@ -111,7 +124,7 @@ export async function getMessagesByContainer(container: string) {
       orderBy: {
         created: "desc",
       },
-      select: messageSelect
+      select: messageSelect,
     });
 
     return messages.map((message) => mapMessageToMessageDto(message));
@@ -178,4 +191,4 @@ const messageSelect = {
       image: true,
     },
   },
-}
+};

@@ -1,9 +1,13 @@
-"use client"
+"use client";
 import { MessageDto } from "@/types";
 import React, { useEffect } from "react";
 import clsx from "clsx";
 import { Avatar } from "@nextui-org/react";
-import { getDefaultImageSrc, transformImageUrl } from "@/app/lib/utils";
+import {
+  getDefaultImageSrc,
+  timeAgo,
+  transformImageUrl,
+} from "@/app/lib/utils";
 
 type Props = {
   message: MessageDto;
@@ -32,7 +36,9 @@ export default function MessageBox({ message, currentUserId }: Props) {
       })}
     >
       {message.dateRead && message.recipientId !== currentUserId ? (
-        <span className="text-xs text-black text-italic">(Read 4mns ago)</span>
+        <span className="text-xs text-black text-italic">
+          (Read {timeAgo(message.dateRead)})
+        </span>
       ) : (
         <div></div>
       )}
@@ -83,7 +89,7 @@ export default function MessageBox({ message, currentUserId }: Props) {
         {renderMessageContent()}
         {isCurrentUserSender && renderAvatar()}
       </div>
-      <div ref={messageEndRef}/>
+      <div ref={messageEndRef} />
     </div>
   );
 }
