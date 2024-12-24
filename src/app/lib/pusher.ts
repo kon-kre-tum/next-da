@@ -1,26 +1,33 @@
-import PusherServer from 'pusher';
-import PusherClient from 'pusher-js';
+import PusherServer from "pusher";
+import PusherClient from "pusher-js";
 
 declare global {
-    var pusherServerInstance: PusherServer | undefined;
-    var pusherClientInstance: PusherClient | undefined;
+  var pusherServerInstance: PusherServer | undefined;
+  var pusherClientInstance: PusherClient | undefined;
 }
 
-if(!global.pusherServerInstance) {
-    global.pusherServerInstance = new PusherServer({
-        appId: process.env.PUSHER_APP_ID!,
-        key: process.env.NEXT_PUBLIC_PUSHER_APP_KEY!,
-        secret: process.env.PUSHER_SECRET!,
-        cluster: "us2",
-        useTLS: true
-    });
+if (!global.pusherServerInstance) {
+  global.pusherServerInstance = new PusherServer({
+    appId: process.env.PUSHER_APP_ID!,
+    key: process.env.NEXT_PUBLIC_PUSHER_APP_KEY!,
+    secret: process.env.PUSHER_SECRET!,
+    cluster: "us2",
+    useTLS: true,
+  });
 }
 
-if(!global.pusherClientInstance) {
-    global.pusherClientInstance = new PusherClient(process.env.NEXT_PUBLIC_PUSHER_APP_KEY!, {
-        cluster: "us2",
-        forceTLS: true
-    });
+if (!global.pusherClientInstance) {
+  global.pusherClientInstance = new PusherClient(
+    process.env.NEXT_PUBLIC_PUSHER_APP_KEY!,
+    {
+      channelAuthorization: {
+        endpoint: "/api/pusher-auth",
+        transport: "ajax",
+      },
+      cluster: "us2",
+      forceTLS: true,
+    }
+  );
 }
 
 export const pusherServer = global.pusherServerInstance;
